@@ -35,13 +35,17 @@ async function handleEvent(event) {
     voteCondition = context.split(' ');
     const voteData = {
       userId,
-      voteNumber: voteCondition[1],
+      awardNumber: voteCondition[1],
       team: voteCondition[2],
     };
     const userData = await redisPromise.getTeamAndUpdateAwards(voteData);
     if (typeof userData === 'string') message = userData;
-    else await redisPromise.saveJsonToRedis('votes', userData);
-    console.log(userData);
+    else {
+      await redisPromise.saveJsonToRedis('votes', userData);
+      message = '投票成功';
+    }
+  } else if (context === 'list') {
+    message = await redisPromise.getAwards();
   } else {
     let lineData = { userId: userId, avatar: USER_AVATAR, text: context };
 

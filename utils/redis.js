@@ -43,7 +43,7 @@ redisPromise.getTeamAndUpdateAwards = (voteData) => {
       if (val === '' || val === null) {
         console.log('Vote list was empty, input init team data.');
         userData.award = [];
-        userData.awardList = { userId: '', votes: [] };
+        userData.awardList = [];
         // implement some condition to map teamList to userData.award
         userData.award.push(
           {
@@ -71,6 +71,18 @@ redisPromise.getTeamAndUpdateAwards = (voteData) => {
             },
           }
         );
+        userData.awardList.push({ userId: voteData.userId, votes: voteData.team });
+
+        // update TEAM award count.
+        // if found, break.
+        for (let i = 0; i < userData.award.length; i++) {
+          let award = userData.award[i];
+          if (voteData.team === award.team) {
+            award.awards[voteData.awardNumber] += 1;
+            break;
+          }
+        }
+
         // if empty list
         /**
          * voteData = {userId, awardNumber, team}
@@ -78,18 +90,19 @@ redisPromise.getTeamAndUpdateAwards = (voteData) => {
       } else {
         userData = JSON.parse(val);
         if (teamList.indexOf(voteData.team) === -1)
-          resolve('投票的隊伍錯了喔！'); // error
+          resolve('投票的隊伍錯了喔！');
+        // error
         else {
           // Judge vote list upper limit = 3
           let count = 0;
-          for (let i = 0; i < userData.awardList.votes.length; i++) {
-            if (count === 3) resolve('投票超過上限');
-            if (userData.awardList.userId === voteData.userId) count += 1;
-          }
+          const awardList = userData.awardList;
+          for (let i = 0; i < awardList.length; i++)
+            if (awardList[i].userId === voteData.userId) count += 1;
+
+          if (count === 3) resolve('投票超過上限');
           // update awardList user and they vote team
           // could vote same team three times
-          userData.awardList.userId = voteData.userId;
-          userData.awardList.votes.push(voteData.team);
+          awardList.push({ userId: voteData.userId, votes: voteData.team });
 
           // update TEAM award count.
           // if found, break.
@@ -104,6 +117,14 @@ redisPromise.getTeamAndUpdateAwards = (voteData) => {
       }
 
       resolve(userData);
+    });
+  });
+};
+redisPromise.getAwards = () => {
+  return new Promise((resolve, reject) => {
+    redisClient.get('votes', (err, val) => {
+      console.log('get awards list');
+      resolve(val);
     });
   });
 };
