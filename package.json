@@ -1,0 +1,23 @@
+{
+  "name": "line-bot-ws",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "start": "cross-env NODE_ENV=production node index.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@line/bot-sdk": "^7.2.0",
+    "cross-env": "^6.0.3",
+    "express": "^4.17.1",
+    "redis": "^3.1.2",
+    "ws": "^7.4.2"
+  },
+  "devDependencies": {
+    "dotenv": "^8.2.0",
+    "nodemon": "^2.0.4"
+  }
+}
